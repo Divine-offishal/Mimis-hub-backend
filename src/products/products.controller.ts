@@ -1,4 +1,50 @@
-import { Controller } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Post,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common';
+import { ProductsService } from './products.service';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { CreateProductDto } from './dto/createProduct.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 
 @Controller('products')
-export class ProductsController {}
+export class ProductsController {
+  constructor(
+    private productsService: ProductsService,
+    private cloudinaryService: CloudinaryService,
+  ) {}
+
+  @Post()
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileInterceptor('productImage'))
+  @UsePipes(new ValidationPipe())
+  async createProduct(
+    @UploadedFile() file: Express.MulterFile,
+    @Body() createProductDto: CreateProductDto,
+  ) {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    const imageUrl = await this.cloudinaryService.uploadFile(file);
+
+    // const { productImage, ...rest } = createProductDto;
+
+    const productData = {
+      ...createProductDto,
+      productImage: imageUrl,
+    };
+
+    const product = await this.productsService.createProduct(productData);
+
+    return product;
+  }
+}

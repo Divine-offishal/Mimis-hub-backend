@@ -43,7 +43,7 @@ export class AuthService {
 
       return await newUser.save();
     } catch (error) {
-      if (error.code == 11000)
+      if ((error as any).code == 11000)
         throw new BadRequestException('A user with that email already exists.');
 
       throw error;
