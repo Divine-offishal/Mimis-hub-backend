@@ -2,6 +2,8 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
+  Param,
   Post,
   UploadedFile,
   UseGuards,
@@ -36,8 +38,6 @@ export class ProductsController {
 
     const imageUrl = await this.cloudinaryService.uploadFile(file);
 
-    // const { productImage, ...rest } = createProductDto;
-
     const productData = {
       ...createProductDto,
       productImage: imageUrl,
@@ -46,5 +46,16 @@ export class ProductsController {
     const product = await this.productsService.createProduct(productData);
 
     return product;
+  }
+
+  @Get()
+  async getAllProducts() {
+    return await this.productsService.getAllProducts();
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard)
+  async getProductById(@Param('id') id: string) {
+    return await this.productsService.getProductById(id);
   }
 }
