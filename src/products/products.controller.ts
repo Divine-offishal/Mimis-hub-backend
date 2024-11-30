@@ -17,7 +17,7 @@ import { CreateProductDto } from './dto/createProduct.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 
-@Controller('products')
+@Controller('api/v1/products')
 export class ProductsController {
   constructor(
     private productsService: ProductsService,
